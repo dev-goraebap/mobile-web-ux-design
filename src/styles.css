@@ -1,3 +1,72 @@
-/* You can add global styles to this file, and also import other style files */
+/* 글로벌 스타일 — 디자인 토큰과 기본 바탕을 정의합니다. */
 
+/* 폰트 (self-host via Fontsource). ABC Ginto Nord·ggsans는 독점이므로 대체합니다. */
+@import '@fontsource-variable/space-grotesk';
+@import '@fontsource-variable/inter';
+
+/* Tailwind */
 @import 'tailwindcss';
+
+/* CDK 오버레이 기본 스타일 (바텀시트·모달·드롭다운의 위치·백드롭) */
+@import '@angular/cdk/overlay-prebuilt.css';
+
+/* ─── 디자인 토큰 (출처: DESIGN.md — Discord) ───
+   클래스가 아니라 토큰을 노출합니다. 컴포넌트는 이 토큰을 참조합니다. */
+@theme {
+  /* 색 */
+  --color-primary: #5865f2; /* Blurple — 기본 행동 */
+  --color-on-primary: #ffffff;
+  --color-green: #35ed7e; /* 최고 강조 CTA 전용 */
+  --color-magenta: #ec48bd; /* 강조 패널·배지 */
+  --color-link: #00b0f4;
+  --color-canvas: #0a0d3a; /* 기본 캔버스 */
+  --color-surface-indigo: #1e2353;
+  --color-surface-onyx: #23272a;
+  --color-surface-black: #000000;
+  --color-ink: #ffffff; /* 다크 위 기본 글자 */
+  --color-ink-dark: #000000;
+  --color-muted: #333333;
+  --color-hairline: #23272a;
+
+  /* 라운드 */
+  --radius-xs: 6px;
+  --radius-sm: 12px;
+  --radius-md: 14px;
+  --radius-lg: 16px;
+  --radius-xl: 40px;
+  --radius-pill: 50px;
+  --radius-jumbo: 120px;
+
+  /* 간격 (8px 베이스) */
+  --spacing-xxs: 4px;
+  --spacing-xs: 8px;
+  --spacing-sm: 12px;
+  --spacing-md: 16px;
+  --spacing-lg: 20px;
+  --spacing-xl: 24px;
+  --spacing-xxl: 32px;
+  --spacing-section: 40px;
+
+  /* 브레이크포인트 (DESIGN.md 사다리) */
+  --breakpoint-tablet: 768px;
+  --breakpoint-laptop: 1024px;
+  --breakpoint-desktop: 1280px;
+
+  /* 폰트 */
+  --font-display: 'Space Grotesk Variable', system-ui, sans-serif;
+  --font-body: 'Inter Variable', system-ui, sans-serif;
+}
+
+/* 기본 바탕 — 디스코드는 deep-indigo 다크 캔버스를 기반으로 합니다.
+   라이트 테마는 이후 토큰 스왑으로 추가합니다. */
+:root {
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  background-color: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+}
