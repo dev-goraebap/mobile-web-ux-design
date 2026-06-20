@@ -11,4 +11,26 @@
       <button ui-button variant="primary" [disabled]="true">비활성</button>
     </div>
   </section>
+
+  <section class="flex flex-col gap-md">
+    <h2 class="font-display text-xl text-ink">적응형 Sheet</h2>
+    <p class="text-ink/70 max-w-prose">
+      화면을 좁히면 바텀시트(끌어서 닫기), 넓히면 가운데 모달로 바뀝니다.
+    </p>
+    <button ui-button variant="cta" (click)="sheetOpen.set(true)">시트 열기</button>
+  </section>
 </main>
+
+<ui-sheet [(open)]="sheetOpen" heading="적응형 시트">
+  <div class="flex flex-col gap-md pb-lg">
+    <p class="text-ink/80">
+      같은 컴포넌트가 화면 크기에 따라 표현만 바꿉니다. 모바일에서는 손잡이를 끌어 닫을 수
+      있고, 백드롭 클릭·ESC로도 닫힙니다.
+    </p>
+    <input
+      class="rounded-md bg-surface-indigo px-md py-sm text-ink outline-none placeholder:text-ink/40"
+      placeholder="포커스 가둠 확인용 입력"
+    />
+    <button ui-button variant="primary" (click)="sheetOpen.set(false)">닫기</button>
+  </div>
+</ui-sheet>
