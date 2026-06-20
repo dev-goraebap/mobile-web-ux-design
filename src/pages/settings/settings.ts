@@ -1,5 +1,6 @@
 import { Component, computed, inject } from '@angular/core';
-import { ThemeService } from '@/shared/lib';
+import { Button } from '@/shared/ui';
+import { PwaInstallService, ThemeService } from '@/shared/lib';
 
 /**
  * 설정 — 테마 전환.
@@ -7,6 +8,7 @@ import { ThemeService } from '@/shared/lib';
  */
 @Component({
   selector: 'page-settings',
+  imports: [Button],
   host: { class: 'block h-full' },
   template: `
     <div class="flex h-full flex-col">
@@ -32,11 +34,22 @@ import { ThemeService } from '@/shared/lib';
             ></span>
           </button>
         </div>
+
+        @if (install.canInstall()) {
+          <div class="flex items-center justify-between rounded-md bg-surface-indigo px-md py-md">
+            <div class="flex flex-col">
+              <span class="text-ink">앱 설치</span>
+              <span class="text-sm text-ink/50">홈 화면에 추가해 앱처럼 사용</span>
+            </div>
+            <button ui-button variant="primary" (click)="install.install()">설치</button>
+          </div>
+        }
       </div>
     </div>
   `,
 })
 export default class Settings {
   protected readonly theme = inject(ThemeService);
+  protected readonly install = inject(PwaInstallService);
   protected readonly isDark = computed(() => this.theme.theme() === 'dark');
 }
