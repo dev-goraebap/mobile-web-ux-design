@@ -1,0 +1,5 @@
+/* app-root는 기본 display:inline이라 폭이 내용에 맞춰 줄어든다.
+   블록으로 두어 자식의 w-full(100%)이 실제 폭을 기준으로 잡히게 한다. */
+:host {
+  display: block;
+}

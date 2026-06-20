@@ -19,6 +19,49 @@
     </p>
     <button ui-button variant="cta" (click)="sheetOpen.set(true)">시트 열기</button>
   </section>
+
+  <section class="flex flex-col gap-md w-full max-w-md">
+    <h2 class="font-display text-xl text-ink">데이터 레이어 (Dexie + liveQuery)</h2>
+    <p class="text-ink/70">추가/토글/삭제가 IndexedDB에 영속화됩니다. 새로고침해도 유지됩니다.</p>
+
+    <form class="flex gap-sm" (submit)="$event.preventDefault(); addTodo()">
+      <input
+        class="flex-1 rounded-md bg-surface-indigo px-md py-sm text-ink outline-none placeholder:text-ink/40"
+        placeholder="할 일을 입력하세요"
+        [value]="draft()"
+        (input)="draft.set($any($event.target).value)"
+        aria-label="할 일 제목"
+      />
+      <button ui-button variant="primary" type="submit">추가</button>
+    </form>
+
+    <ul class="flex flex-col gap-xs">
+      @for (todo of todos.todos(); track todo.id) {
+        <li class="flex items-center gap-sm rounded-md bg-surface-indigo px-md py-sm">
+          <input
+            type="checkbox"
+            class="size-5 shrink-0"
+            [checked]="todo.done"
+            (change)="todos.toggle(todo.id)"
+            [attr.aria-label]="todo.title + ' 완료 토글'"
+          />
+          <span class="flex-1 text-ink" [class]="todo.done ? 'line-through opacity-50' : ''">
+            {{ todo.title }}
+          </span>
+          <button
+            type="button"
+            class="text-ink/60 hover:text-magenta px-xs"
+            (click)="todos.remove(todo.id)"
+            [attr.aria-label]="todo.title + ' 삭제'"
+          >
+            ✕
+          </button>
+        </li>
+      } @empty {
+        <li class="text-ink/40 py-sm">아직 할 일이 없습니다.</li>
+      }
+    </ul>
+  </section>
 </main>
 
 <ui-sheet [(open)]="sheetOpen" heading="적응형 시트">
