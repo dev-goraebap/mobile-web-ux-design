@@ -1,3 +1,23 @@
+# 이 프로젝트 (에이전트 온보딩)
+
+모바일 우선 반응형 UX 데모. 투두리스트 플랫폼 위에서 모바일 UX 패턴(바텀시트·제스처·safe-area)을 구현·검증한다.
+스택: Angular 22 + CDK + Tailwind v4, CSR PWA, IndexedDB(Dexie) + localStorage.
+
+## 먼저 읽을 문서 (순서)
+
+1. `docs/01.기획/프로젝트-브리프.md` — 확정 범위·기능·스택·다음 단계 (상태의 단일 진실 소스)
+2. `docs/02.설계/` — 도메인 모델(`전략적설계/`), 화면 흐름(`스토리보드.md`)
+3. `docs/03.구현/` — FSD 프로젝트 구조(`프로젝트구조.md`), 디자인 시스템(`디자인시스템.md`)
+
+기획(무엇을·왜) → 설계(문제 공간: 도메인·UX) → 구현(해결 공간: Angular·Tailwind·CDK) 순으로 좁혀진다.
+
+## 도구
+
+- 상세 Angular 모범 사례는 아래 규칙 외에 Angular MCP(`ng mcp`)와 `angular-developer` 스킬로 보강한다.
+- 현재 진행 상황은 docs 문서와 git log 이력으로 파악한다.
+
+---
+
 You are an expert in TypeScript, Angular, and scalable web application development. You write functional, maintainable, performant, and accessible code following Angular and TypeScript best practices.
 
 ## TypeScript Best Practices
