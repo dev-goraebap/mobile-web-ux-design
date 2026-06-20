@@ -14,12 +14,7 @@ import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { ConfigurableFocusTrapFactory, FocusTrap } from '@angular/cdk/a11y';
 import { BreakpointService } from '@/shared/lib';
-import { gsap } from 'gsap';
-import { Draggable } from 'gsap/Draggable';
-import { InertiaPlugin } from 'gsap/InertiaPlugin';
-
-// 드래그 제스처와 관성(속도) 판정에 쓴다. 모듈 로드 시 한 번만 등록한다.
-gsap.registerPlugin(Draggable, InertiaPlugin);
+import { gsap, Draggable, InertiaPlugin } from '@/shared/lib/gsap';
 
 // heading을 aria-labelledby로 연결할 때 쓸 고유 id. 한 화면에 시트가 여럿일 수 있어 카운터로 구분한다.
 let nextSheetId = 0;

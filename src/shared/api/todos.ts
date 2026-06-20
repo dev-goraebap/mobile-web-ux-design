@@ -34,4 +34,9 @@ export class TodoStore {
   async remove(id: string): Promise<void> {
     await db.todos.delete(id);
   }
+
+  /** 삭제된 할 일을 원래 id·생성시각 그대로 되돌린다(되돌리기 Snackbar용). */
+  async restore(todo: Todo): Promise<void> {
+    await db.todos.put(todo);
+  }
 }
