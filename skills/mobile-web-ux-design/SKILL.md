@@ -3,7 +3,7 @@ name: mobile-web-ux-design
 description: 반응형 웹앱을 모바일에서도 앱처럼 느끼게 만드는 설계 방법. 적응형 바텀시트와 모달, 끌어서 닫기와 스와이프 제스처, safe-area, 적응형 내비(탭바와 사이드 레일), 가상 스크롤, 다크/라이트 테마를 다룬다. 가장 쉬운 길은 Ionic이나 Angular Material 같은 완성형 프레임워크를 쓰는 것이고, 디자인 시스템의 소유권을 가지려면 도메인을 모르는 공용 컴포넌트가 헤드리스 프리미티브와 모바일 UX를 안으로 품게 구성한다. 예제는 Angular로 든다. 키워드 mobile UX, 바텀시트, bottom sheet, 제스처, gesture, swipe, drag-to-dismiss, safe-area, 적응형, responsive, headless, 디자인 시스템, Ionic, Material.
 license: Apache-2.0
 metadata:
-  reference-impl: Angular 22 + CDK + Tailwind v4 (이 레포)
+  reference-impl: https://github.com/dev-goraebap/mobile-web-ux-design (Angular 22 + CDK + Tailwind v4)
   scope: 디자인 시스템, 헤드리스 프리미티브, 모바일 UX
 ---
 
@@ -40,7 +40,7 @@ flowchart TB
 
 ## 프레임워크에 맞는 라이브러리를 고른다
 
-헤드리스 동작과 제스처는 직접 짜기 어렵고 틀리기 쉬우니 검증된 라이브러리를 차용한다. 이 레포는 Angular라 동작과 접근성은 CDK(오버레이, 포커스 트랩, 브레이크포인트, 가상 스크롤)에서, 제스처와 모션은 GSAP에서 가져온다. 다른 환경이라면 그 환경에서 검증된 것을 리서치해 같은 자리에 끼우면 된다. 헤드리스는 React의 Radix나 React Aria, Svelte의 Melt나 Bits가 있고 포지셔닝은 Floating UI가 프레임워크에 무관하다. 제스처와 모션은 GSAP이 어디서나 쓰이고 React에는 @use-gesture 같은 선택지가, 가상 스크롤은 TanStack Virtual이 여러 프레임워크를 함께 지원한다. 이 목록은 예시일 뿐 처방이 아니다. 핵심은 이런 동작을 직접 만들지 말고, 내 환경에서 검증된 것을 골라 디자인 시스템 컴포넌트 안에 감추는 것이다.
+헤드리스 동작과 제스처는 직접 짜기 어렵고 틀리기 쉬우니 검증된 라이브러리를 차용한다. 참조 구현은 Angular라 동작과 접근성은 CDK(오버레이, 포커스 트랩, 브레이크포인트, 가상 스크롤)에서, 제스처와 모션은 GSAP에서 가져온다. 다른 환경이라면 그 환경에서 검증된 것을 리서치해 같은 자리에 끼우면 된다. 헤드리스는 React의 Radix나 React Aria, Svelte의 Melt나 Bits가 있고 포지셔닝은 Floating UI가 프레임워크에 무관하다. 제스처와 모션은 GSAP이 어디서나 쓰이고 React에는 @use-gesture 같은 선택지가, 가상 스크롤은 TanStack Virtual이 여러 프레임워크를 함께 지원한다. 이 목록은 예시일 뿐 처방이 아니다. 핵심은 이런 동작을 직접 만들지 말고, 내 환경에서 검증된 것을 골라 디자인 시스템 컴포넌트 안에 감추는 것이다.
 
 ## 쌓는 순서
 
@@ -58,9 +58,13 @@ flowchart TB
 
 제스처는 거리만이 아니라 속도까지 본다. 얼마나 끌었는지와 얼마나 빨리 던졌는지를 함께 봐야 닫을지 되돌릴지 판정이 자연스럽다.
 
-## 구현 예제 (이 레포, Angular)
+## 참조 구현
 
-방법론은 위와 references에 있고, 구체 코드는 레포에서 본다.
+이 스킬은 방법만 담는다. 전체 코드 예제는 별도 GitHub 레포에 있다(이 스킬 폴더에는 포함되지 않는다).
+
+https://github.com/dev-goraebap/mobile-web-ux-design (Angular 22 + CDK + Tailwind v4)
+
+그 레포에서 다음 경로를 보면 된다.
 
 - 토큰: `src/styles.css`
 - 프리미티브: `src/shared/ui/` (Button, Sheet, ListItem, Snackbar, Checkbox)
