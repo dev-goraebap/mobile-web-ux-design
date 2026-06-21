@@ -49,14 +49,15 @@ SSR과 CSR을 라우트별로 조율해 양쪽의 이점을 함께 취하는 방
 ```
 1. 디자인 시스템 (소유)   ── Tailwind 토큰 + 토큰으로 감싼 자체 컴포넌트
 2. 헤드리스 프리미티브     ── Angular CDK (동작·접근성, 스타일 없음)
-3. 모바일 UX 레이어        ── CDK + CSS + Pointer Events
+3. 모바일 UX 레이어        ── CDK + CSS + GSAP (적응형·제스처·애니메이션)
 4. PWA 셸                  ── service worker · manifest · 오프라인 캐싱
 ```
 
-이 중 3층, 모바일 UX 레이어가 이 프로젝트의 작업 대부분을 차지합니다. 여기서 책임을 둘로 나눕니다.
+1~3층이 "어떻게 느껴지는가"(본질), 4층은 "어떻게 전달되는가"(마감)입니다. 이 중 3층, 모바일 UX 레이어가 작업의 대부분을 차지하며, 여기서 책임을 나눕니다.
 
-- **CDK가 담당하는 부분** — Overlay(바텀시트·모달), DragDrop(스와이프·정렬), BreakpointObserver(적응형 분기), Scrolling(가상 스크롤), A11y(FocusTrap·LiveAnnouncer), Platform·Portal. 검증된 구현이 있는 동작은 다시 만들지 않습니다.
-- **직접 구현하는 부분** — safe-area `env(safe-area-inset-*)`, 네이티브 스크롤 감성(`scroll-snap`·`overscroll-behavior`), 고수준 제스처(Pointer Events), 페이지 전환(Angular Animations, transform/opacity만). 추가 라이브러리 없이 웹 표준만으로 구현합니다.
+- **CDK가 담당** — Overlay(바텀시트·모달), BreakpointObserver(적응형 분기), Scrolling(가상 스크롤), A11y(FocusTrap·LiveAnnouncer), Portal. 검증된 동작은 다시 만들지 않습니다.
+- **GSAP이 담당** — 고수준 제스처(Draggable + InertiaPlugin로 끌어서 닫기·스와이프, 속도 기반 스냅/닫기 판정)와 열기·닫기 애니메이션(transform·opacity만). CSS만으로 안 되는 "던진 속도 측정"이 필요해 도입했습니다.
+- **CSS가 담당** — safe-area `env(safe-area-inset-*)`, 적응형 내비 방향 전환(반응형 유틸리티), 테마 토큰 스왑·전환.
 
 여기에 한 가지 원칙을 적용합니다. **Tailwind 클래스는 구현 디테일이며, 공개 API가 아닙니다.** 디자인 시스템은 클래스 이름이 아니라 컴포넌트를 노출합니다. 클래스 이름을 외부에 노출하면 그것이 사실상의 API가 되어, 이후 내부 구현을 바꾸기 어려워지기 때문입니다.
 
@@ -75,15 +76,61 @@ SSR과 CSR을 라우트별로 조율해 양쪽의 이점을 함께 취하는 방
 npm start        # = ng serve, http://localhost:4200
 ```
 
-소스를 저장하면 화면이 자동으로 갱신됩니다.
+소스를 저장하면 화면이 자동으로 갱신됩니다. 데스크톱에서 창 폭을 1024px 경계로 넓혔다 줄이면
+시트(모달 ↔ 바텀시트)와 내비(레일 ↔ 탭바)가 전환되는 걸 볼 수 있습니다.
 
-> 한 가지 유의할 점이 있습니다. 서비스 워커는 `ng serve`에서 동작하지 않습니다. PWA 동작을 확인하려면 프로덕션 빌드 후 정적 서버로 띄워야 하며, 설치와 서비스 워커는 HTTPS(또는 localhost)를 요구합니다.
+### 같은 WiFi에서 모바일로 보기
+
+개발 서버를 LAN에 노출합니다.
+
+```bash
+npm start -- --host 0.0.0.0
+```
+
+PC의 WiFi IPv4 주소를 확인합니다.
+
+```bash
+# Windows — "무선 LAN 어댑터 Wi-Fi"의 IPv4 주소
+ipconfig
+# macOS
+ipconfig getifaddr en0
+# Linux
+hostname -I
+```
+
+폰을 **같은 WiFi**에 두고 `http://<그-IP>:4200`을 엽니다 (예: `http://192.168.0.10:4200`).
+
+> 💡 안 열리면 **방화벽**이 Node를 막는 경우가 많습니다 — 실행 시 뜨는 허용 창에서 **개인 네트워크**를 허용하세요(Windows).
+>
+> ⚠️ 이건 **개발 서버라 서비스 워커가 꺼져 있습니다.** 모바일 UX(시트·제스처·safe-area)는 이걸로 충분히 확인되고, 설치·오프라인은 아래 "PWA 로컬 테스트"를 보세요.
 
 ### 빌드
 
 ```bash
 npm run build    # dist/ 에 프로덕션 빌드 산출
 ```
+
+### PWA 로컬 테스트 (설치 · 오프라인)
+
+서비스 워커는 `enabled: !isDevMode()`라 **프로덕션 빌드에서만** 동작합니다. 빌드 후 정적 서버로 띄웁니다.
+
+```bash
+npm run build
+npx http-server dist/angular-responsive-ux/browser -p 8080 -c-1
+# http://localhost:8080
+```
+
+- **데스크톱** — `localhost`는 보안 컨텍스트라 그대로 됩니다.
+  - DevTools → Application → **Service Workers**에서 등록 확인
+  - DevTools → Network → **Offline** 체크 후 새로고침 → 오프라인 동작 확인
+  - 주소창 설치 아이콘 또는 앱 내 **설정 → 앱 설치**로 설치
+- **모바일에서 설치/오프라인까지** 보려면 ⚠️ **HTTPS가 필요**합니다. LAN IP(`http://192.168...`)는 보안 컨텍스트가 아니라 서비스 워커가 등록되지 않습니다. HTTPS 터널을 쓰세요.
+
+  ```bash
+  npx cloudflared tunnel --url http://localhost:8080   # 또는 ngrok
+  ```
+
+  출력된 `https://...` 주소를 폰에서 열면 설치·오프라인을 테스트할 수 있습니다.
 
 ### 테스트 (Vitest)
 
@@ -93,17 +140,20 @@ npm test
 
 ---
 
-## 로드맵
+## 구현 현황
 
-현재 Angular 22 + Tailwind v4 스캐폴딩이 완료된 상태입니다. 다음 순서로 한 층씩 구현합니다.
+핵심 데모 범위(디자인 시스템 → 모바일 UX → PWA)가 구현되어 있습니다.
 
-- [ ] **CDK 설치** — `npm install @angular/cdk`, `styles.css`에 `@import '@angular/cdk/overlay-prebuilt.css';` 추가
-- [ ] **적응형 바텀시트/모달** — CDK `Overlay` + `BreakpointObserver`로 구현합니다. 모바일에서는 하단에서 올라오는 바텀시트, 데스크톱에서는 중앙 모달이 됩니다. `FocusTrap`, 백드롭 클릭 닫기, `safe-area-inset-bottom`, 열기/닫기 애니메이션을 포함합니다. 이 컴포넌트가 이후 패턴들의 참조 구현이 됩니다.
-- [ ] **디자인 토큰 정의** — 색 / 간격 / 타이포 스케일을 정하고 Tailwind 설정에 매핑
-- [ ] **기본 컴포넌트** — 버튼 · 인풋 등
-- [ ] **PWA 셸** — `ng add @angular/pwa` (service worker + manifest + 아이콘)
+- [x] **디자인 토큰** — `styles.css` `@theme`(Discord 기반), 다크 기본 + 라이트 스왑
+- [x] **프리미티브** — Button · Sheet · ListItem · Snackbar · Checkbox (`shared/ui`)
+- [x] **적응형 Sheet** — CDK Overlay + BreakpointObserver, 끌어서 닫기(GSAP)
+- [x] **적응형 Nav** — 하단 탭바 ↔ 사이드 레일
+- [x] **데이터 레이어** — Dexie + liveQuery → signal, 영속 저장 요청
+- [x] **할 일 기능** — 가상 스크롤 목록, 추가(시트)·완료 토글·삭제·되돌리기
+- [x] **테마 전환** — 설정에서 다크/라이트, localStorage 영속
+- [x] **PWA 셸** — service worker · manifest · 설치 흐름
 
-> 컴포넌트에서 DOM에 접근할 때는 `afterNextRender()` 안에서 합니다. CSR 프로젝트에서도 이 규율을 지키면 렌더링 시점이 명확해지고, 이후 SSR을 도입할 여지도 함께 남습니다.
+> 클라이언트 전용 동작(제스처·storage·DOM 접근)은 `afterNextRender()` 등으로 렌더 시점을 명확히 둡니다. CSR이어도 이 규율을 지키면 이후 별도 SSR 프로젝트로 옮길 여지가 남습니다.
 
 ---
 
