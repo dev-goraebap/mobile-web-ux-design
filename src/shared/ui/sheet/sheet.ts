@@ -104,7 +104,9 @@ export class Sheet {
 
   protected readonly bodyClasses = computed(() => {
     const padX = this.bp.isMobile() ? 'px-lg' : 'px-xl';
-    return `${padX} overflow-y-auto`;
+    // 상단 패딩이 0이면 스크롤 클리핑 박스 경계에서 첫 요소의 포커스 링·보더가 잘린다.
+    // 작은 inset으로 콘텐츠를 띄워 잘림을 막는다(좌우는 px 패딩이, 아래는 콘텐츠 패딩이 담당).
+    return `${padX} pt-1 overflow-y-auto`;
   });
 
   constructor() {
