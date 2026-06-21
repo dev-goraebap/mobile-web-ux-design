@@ -19,7 +19,7 @@ import { gsap } from '@/shared/lib/gsap';
       @if (actionLabel(); as label) {
         <button
           type="button"
-          class="min-h-[44px] px-xs font-medium text-link"
+          class="min-h-11 px-xs font-medium text-link"
           (click)="action.emit()"
         >
           {{ label }}

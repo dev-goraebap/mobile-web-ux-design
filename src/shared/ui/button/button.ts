@@ -24,7 +24,7 @@ export class Button {
   // Tailwind 클래스는 구현 디테일이므로 컴포넌트 밖으로 노출하지 않는다.
   protected readonly classes = computed(() => {
     const base =
-      'inline-flex items-center justify-center min-h-[44px] font-medium transition-colors select-none disabled:opacity-50 disabled:pointer-events-none';
+      'inline-flex items-center justify-center min-h-11 font-medium transition-colors select-none disabled:opacity-50 disabled:pointer-events-none';
     const byVariant: Record<ButtonVariant, string> = {
       primary: 'bg-primary text-on-primary rounded-sm px-xl py-lg',
       cta: 'bg-green text-ink-dark rounded-sm px-xl py-sm',

@@ -29,7 +29,7 @@ interface NavItem {
           [routerLink]="item.path"
           routerLinkActive="text-primary"
           [routerLinkActiveOptions]="{ exact: item.exact }"
-          class="flex min-h-[44px] flex-1 flex-col items-center justify-center gap-xxs px-sm py-sm text-ink/70 transition-colors laptop:flex-none"
+          class="flex min-h-11 flex-1 flex-col items-center justify-center gap-xxs px-sm py-sm text-ink/70 transition-colors laptop:flex-none"
         >
           <span aria-hidden="true">
             @switch (item.icon) {

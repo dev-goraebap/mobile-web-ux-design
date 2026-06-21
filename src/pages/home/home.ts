@@ -50,12 +50,15 @@ import { AddTodoSheet } from './ui/add-todo-sheet';
                 (change)="toggle(todo)"
                 [attr.aria-label]="todo.title + ' 완료 토글'"
               />
-              <span class="flex-1 truncate text-ink" [class]="todo.done ? 'line-through opacity-50' : ''">
+              <span
+                class="flex-1 truncate text-ink"
+                [class]="todo.done ? 'line-through opacity-50' : ''"
+              >
                 {{ todo.title }}
               </span>
               <button
                 type="button"
-                class="min-h-[44px] px-xs text-ink/50 hover:text-magenta"
+                class="min-h-11 px-xs text-ink/50 hover:text-magenta"
                 (click)="remove(todo)"
                 [attr.aria-label]="todo.title + ' 삭제'"
               >
@@ -68,7 +71,7 @@ import { AddTodoSheet } from './ui/add-todo-sheet';
 
       <button
         type="button"
-        class="absolute end-lg bottom-lg flex size-14 items-center justify-center rounded-pill bg-green text-3xl text-ink-dark shadow-[0_0_32px_rgba(53,237,126,0.45)]"
+        class="absolute inset-e-lg bottom-lg flex size-14 items-center justify-center rounded-pill bg-green text-3xl text-ink-dark shadow-[0_0_32px_rgba(53,237,126,0.45)]"
         (click)="addOpen.set(true)"
         aria-label="할 일 추가"
       >
