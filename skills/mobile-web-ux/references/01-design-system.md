@@ -1,0 +1,70 @@
+# 1층 — 디자인 시스템 (소유)
+
+## 소유할 것인가
+
+이 결정을 공정하게 내리려면 소유하지 않는 쪽의 이점을 먼저 인정하는 것이 옳다. Ionic이나 Material 같은 완성형 라이브러리는 스타일과 헤드리스 동작을, Ionic의 경우 모바일 UX의 상당 부분까지 한꺼번에 준다. 검증된 접근성과 빠른 출발이 그 보상이고, 빨리 출시해야 하는 팀에게는 합리적인 선택이다.
+
+대가는 제어권이다. 컴포넌트가 마크업을 캡슐화할수록 바깥의 스타일이 안쪽까지 닿지 못하고, 디자인의 상당 부분을 라이브러리의 언어에 위임하게 된다. 결과물이 그 라이브러리처럼 보이는 것을 피하기 어렵다.
+
+소유하는 쪽은 제어권을 되찾는 대신 시간과 전문성을 치른다. 다만 오해를 하나 짚어야 한다. 소유한다고 해서 헤드리스 프리미티브를 처음부터 짜는 것은 아니다. 포커스 트랩 같은 동작은 여전히 CDK·Radix에서 차용하고, 그 위에 배선과 스타일만 얹는다. 그러니 이 길은 "외형을 소유하고 동작을 빌리는" 길이라고 부르는 편이 정확하다.
+
+## 토큰을 CSS에서 소유한다
+
+Tailwind v4는 설정을 CSS의 `@theme`에서 한다. 출처 디자인의 값을 토큰으로 옮겨 두면, 그에 대응하는 유틸리티(`bg-primary`, `rounded-lg`, `p-md`, `tablet:flex`)가 생성된다. 디자인을 소유한다는 말의 첫 번째 의미는, 색과 간격과 라운드를 우리가 정한 토큰으로 가진다는 것이다.
+
+```css
+@import 'tailwindcss';
+
+@theme {
+  --color-primary: #5865f2;
+  --color-canvas: #0a0d3a;
+  --color-ink: #ffffff;
+  --radius-lg: 16px;
+  --spacing-md: 16px;
+  --breakpoint-tablet: 768px;
+  --font-display: 'Space Grotesk Variable', system-ui, sans-serif;
+}
+```
+
+레퍼런스는 `src/styles.css`에 있다.
+
+## 다크와 라이트는 토큰 스왑이다
+
+테마 전환을 컴포넌트마다 분기로 처리하면 금세 무너진다. 대신 같은 토큰 *이름*의 값만 바꾼다. 유틸리티는 그대로 두고 색만 따라오므로, 런타임에 `<html data-theme>` 하나만 토글하면 화면 전체가 함께 바뀐다.
+
+```css
+:root { color-scheme: dark; }
+[data-theme='light'] {
+  color-scheme: light;
+  --color-canvas: #f2f3f5;
+  --color-ink: #1a1a1e;
+  /* 브랜드 색(primary 등)은 유지한다 */
+}
+```
+
+선택은 localStorage에 남겨 다음 방문에도 이어지게 한다. 레퍼런스는 `src/shared/lib/theme.ts`다.
+
+## 클래스는 API가 아니다
+
+디자인 시스템이 노출하는 것은 컴포넌트여야 하고, Tailwind 클래스는 그 안에 가둬야 한다. 이유는 단순하다. 클래스 이름을 밖으로 흘리는 순간 그것이 사실상의 API가 되어, 이후 내부 구현을 바꿀 자유를 잃기 때문이다. 그래서 컴포넌트는 의미(variant)만 받고, 색과 라운드 같은 시각 구현은 토큰으로 캡슐화한다.
+
+```ts
+@Component({
+  selector: 'button[ui-button]',
+  host: { '[class]': 'classes()' },
+})
+export class Button {
+  readonly variant = input<'primary' | 'cta' | 'ghost'>('primary');
+  protected readonly classes = computed(() => /* variant → Tailwind */);
+}
+```
+
+레퍼런스는 `src/shared/ui/button/button.ts`다.
+
+## 대비는 두 테마에서 함께 본다
+
+흰색 투명도로 만든 보조 텍스트(`text-ink/40` 같은)는 한쪽 테마만 보고 정하기 쉽지만, 그렇게 하면 함정에 빠진다. 다크에서 충분해 보이던 회색이 라이트로 넘어가면 — 어두운 글자가 밝은 면 위에 옅게 얹히면서 — 대비가 오히려 나빠진다. 그래서 보조 텍스트는 두 테마 모두에서 WCAG AA(본문 기준 4.5:1)를 넘기도록, 대략 `/70` 이상으로 잡는 편이 안전하다.
+
+## 폰트의 빈틈
+
+디스플레이용 라틴 폰트에는 한글이나 CJK 글리프가 없다. 그런 UI라면 글자가 폴백 폰트로 떨어지면서 세로 메트릭 차이로 어긋나 보일 수 있으니, 폴백 체인을 의식적으로 확인해 둔다.
