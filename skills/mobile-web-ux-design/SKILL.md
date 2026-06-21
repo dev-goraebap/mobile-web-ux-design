@@ -1,6 +1,6 @@
 ---
 name: mobile-web-ux-design
-description: 모바일에서 보는 웹사이트의 사용자 경험을 끌어올리는 설계 방법. 적응형 바텀시트/모달, 끌어서 닫기·스와이프 제스처, safe-area, 적응형 내비(탭바↔레일), 가상 스크롤, 다크/라이트 테마, 그리고 PWA(설치·오프라인)로 마감하는 법을 4(=3+1)층 모델로 안내한다. "디자인 시스템을 소유할지" 결정과, 도메인을 모르는 공용 컴포넌트가 헤드리스 프리미티브(CDK/Radix)와 모바일 UX를 안으로 품는 패턴을 다룬다. 트리거: mobile UX, 바텀시트, bottom sheet, 제스처, gesture, swipe, drag-to-dismiss, safe-area, 적응형, responsive app-like, headless, 디자인 시스템, PWA, 설치형 웹앱.
+description: 모바일에서 보는 웹사이트의 사용자 경험을 끌어올리는 설계 방법. 적응형 바텀시트와 모달, 끌어서 닫기와 스와이프 제스처, safe-area, 적응형 내비(탭바와 사이드 레일), 가상 스크롤, 다크/라이트 테마, 그리고 PWA(설치와 오프라인)로 마감하는 법을 4층 모델로 안내한다. 디자인 시스템을 소유할지 결정하고, 도메인을 모르는 공용 컴포넌트가 헤드리스 프리미티브(CDK/Radix)와 모바일 UX를 안으로 품는 패턴을 다룬다. 키워드 mobile UX, 바텀시트, bottom sheet, 제스처, gesture, swipe, drag-to-dismiss, safe-area, 적응형, responsive, headless, 디자인 시스템, PWA, 설치형 웹앱.
 license: Apache-2.0
 metadata:
   reference-impl: Angular 22 + CDK + Tailwind v4 (이 레포)
