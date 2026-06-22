@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { authGuard } from '@/shared/auth';
 
 export const routes: Routes = [
   {
@@ -11,6 +12,21 @@ export const routes: Routes = [
     // 직접 진입·새로고침·모바일은 이 페이지로 렌더한다(ADR-0002).
     path: 'movies/:id',
     loadComponent: () => import('@/pages/movie-detail/movie-detail-page'),
+  },
+  {
+    path: 'login',
+    loadComponent: () => import('@/pages/login/login'),
+  },
+  {
+    // 회원 전용 — 미인증 시 가드가 /login으로 보내고 복귀시킨다(ADR-0006).
+    path: 'wishlist',
+    canActivate: [authGuard],
+    loadComponent: () => import('@/pages/wishlist/wishlist'),
+  },
+  {
+    path: 'me/ratings',
+    canActivate: [authGuard],
+    loadComponent: () => import('@/pages/my-ratings/my-ratings'),
   },
   {
     path: 'settings',

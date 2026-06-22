@@ -1,13 +1,23 @@
 import { Component, computed, effect, inject, input, signal } from '@angular/core';
-import { injectBrnDialogContext } from '@spartan-ng/brain/dialog';
+import { Router } from '@angular/router';
+import { BrnDialogRef, injectBrnDialogContext } from '@spartan-ng/brain/dialog';
 import { HlmButton } from '@spartan-ng/helm/button';
 import { HlmBadge } from '@spartan-ng/helm/badge';
-import { GENRE_LABELS, MovieRepository, type Movie } from '@/shared/api';
+import {
+  AuthService,
+} from '@/shared/auth';
+import {
+  GENRE_LABELS,
+  MovieRepository,
+  RatingRepository,
+  WishlistRepository,
+  type Movie,
+} from '@/shared/api';
 
 /**
  * 영화 상세 콘텐츠 — 표현(모달/페이지)을 모른다.
- * 업무: 한 영화의 정보를 보여 준다. movieId는 입력(페이지)이나 다이얼로그 컨텍스트(모달)에서 받는다.
- * 같은 콘텐츠를 한 번만 작성하고, 데스크톱 모달과 모바일 페이지가 이 컴포넌트를 함께 쓴다(ADR-0002).
+ * 업무: 한 영화의 정보와 회원 액션(위시리스트·평점·공유)을 보여 준다. movieId는 입력(페이지)이나
+ * 다이얼로그 컨텍스트(모달)에서 받는다. 같은 콘텐츠를 데스크톱 모달과 모바일 페이지가 함께 쓴다(ADR-0002).
  */
 @Component({
   selector: 'movie-detail',
@@ -50,8 +60,51 @@ import { GENRE_LABELS, MovieRepository, type Movie } from '@/shared/api';
           <dd class="text-foreground">{{ m.cast.join(', ') }}</dd>
         </dl>
 
-        <div class="flex items-center gap-3">
-          <button hlmBtn (click)="share(m)">공유</button>
+        <!-- 회원 액션 -->
+        <div class="flex flex-col gap-3 border-t border-border pt-4">
+          @if (auth.isAuthenticated()) {
+            <div class="flex flex-wrap items-center gap-2">
+              <button
+                hlmBtn
+                [variant]="inWishlist() ? 'secondary' : 'default'"
+                (click)="toggleWishlist(m)"
+              >
+                {{ inWishlist() ? '♥ 위시리스트에 있음' : '♡ 위시리스트에 담기' }}
+              </button>
+              <button hlmBtn variant="outline" (click)="share(m)">공유</button>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <span class="text-sm text-muted-foreground">내 평점</span>
+              <div class="flex" role="group" aria-label="별점 선택">
+                @for (n of stars; track n) {
+                  <button
+                    type="button"
+                    class="px-0.5 text-2xl leading-none"
+                    (click)="rate(m, n)"
+                    [attr.aria-label]="n + '점'"
+                    [attr.aria-pressed]="myRating() >= n"
+                  >
+                    <span [class]="myRating() >= n ? 'text-yellow-500' : 'text-muted-foreground/40'">
+                      ★
+                    </span>
+                  </button>
+                }
+              </div>
+              @if (myRating() > 0) {
+                <button hlmBtn variant="ghost" size="sm" (click)="clearRating(m)">지우기</button>
+              }
+            </div>
+          } @else {
+            <div class="flex flex-wrap items-center gap-2">
+              <button hlmBtn variant="outline" (click)="share(m)">공유</button>
+            </div>
+            <p class="text-sm text-muted-foreground">
+              <button type="button" class="text-primary underline" (click)="goLogin(m)">로그인</button>
+              하면 찜하고 평점을 남길 수 있습니다.
+            </p>
+          }
+
           @if (shareMessage()) {
             <span class="text-sm text-muted-foreground" role="status" aria-live="polite">
               {{ shareMessage() }}
@@ -66,14 +119,24 @@ import { GENRE_LABELS, MovieRepository, type Movie } from '@/shared/api';
 })
 export class MovieDetail {
   private readonly repo = inject(MovieRepository);
-  // 모달로 열렸을 때만 컨텍스트가 있다(페이지로 열리면 null).
+  private readonly wishlist = inject(WishlistRepository);
+  private readonly rating = inject(RatingRepository);
+  protected readonly auth = inject(AuthService);
+  private readonly router = inject(Router);
+  // 모달로 열렸을 때만 컨텍스트/레퍼런스가 있다(페이지로 열리면 null).
   private readonly ctx = injectBrnDialogContext<{ movieId?: string }>({ optional: true });
+  private readonly dialogRef = inject(BrnDialogRef, { optional: true });
 
   readonly movieId = input<string>();
   private readonly resolvedId = computed(() => this.movieId() ?? this.ctx?.movieId ?? '');
 
   readonly movie = signal<Movie | undefined>(undefined);
   readonly loading = signal(true);
+  readonly inWishlist = signal(false);
+  readonly myRating = signal(0);
+  readonly shareMessage = signal('');
+
+  protected readonly stars = [1, 2, 3, 4, 5];
 
   constructor() {
     effect(() => {
@@ -84,23 +147,58 @@ export class MovieDetail {
         this.movie.set(m);
         this.loading.set(false);
       });
+
+      // 회원이면 이 영화의 위시리스트/평점 상태를 함께 불러온다(로그인/로그아웃에 반응).
+      const uid = this.auth.userId();
+      if (uid) {
+        void this.wishlist.has(uid, id).then((v) => this.inWishlist.set(v));
+        void this.rating.get(uid, id).then((r) => this.myRating.set(r?.score ?? 0));
+      } else {
+        this.inWishlist.set(false);
+        this.myRating.set(0);
+      }
     });
   }
-
-  readonly shareMessage = signal('');
 
   protected genreLabel(key: string): string {
     return GENRE_LABELS[key] ?? key;
   }
 
-  /**
-   * 공유(ADR-0008): 네이티브 공유 시트 → 링크 복사 순으로 폴백한다.
-   * 기술: Web Share·Clipboard API는 보안 컨텍스트(HTTPS/localhost)에서만 동작한다.
-   * LAN HTTP 등 비보안 환경에서는 레거시 execCommand로 복사하고, 항상 피드백을 남긴다.
-   */
+  protected async toggleWishlist(m: Movie): Promise<void> {
+    const uid = this.auth.userId();
+    if (!uid) return;
+    if (this.inWishlist()) {
+      await this.wishlist.remove(uid, m.id);
+      this.inWishlist.set(false);
+    } else {
+      await this.wishlist.add(uid, m.id, new Date().toISOString());
+      this.inWishlist.set(true);
+    }
+  }
+
+  protected async rate(m: Movie, score: number): Promise<void> {
+    const uid = this.auth.userId();
+    if (!uid) return;
+    await this.rating.set(uid, m.id, score, new Date().toISOString());
+    this.myRating.set(score);
+  }
+
+  protected async clearRating(m: Movie): Promise<void> {
+    const uid = this.auth.userId();
+    if (!uid) return;
+    await this.rating.remove(uid, m.id);
+    this.myRating.set(0);
+  }
+
+  /** 비로그인 상태에서 회원 기능 유도 → 로그인 후 이 영화로 복귀. 모달이면 먼저 닫는다. */
+  protected goLogin(m: Movie): void {
+    this.dialogRef?.close();
+    void this.router.navigate(['/login'], { queryParams: { returnUrl: `/movies/${m.id}` } });
+  }
+
+  /** 공유(ADR-0008): 네이티브 공유 시트 → 링크 복사 순으로 폴백한다. */
   protected async share(m: Movie): Promise<void> {
     const url = `${location.origin}/movies/${m.id}`;
-
     if (navigator.share) {
       try {
         await navigator.share({ title: m.title, text: m.synopsis, url });
@@ -109,13 +207,11 @@ export class MovieDetail {
       }
       return;
     }
-
     const copied = await this.copyToClipboard(url);
     this.flash(copied ? '링크가 복사되었습니다' : '이 환경에서는 공유를 지원하지 않습니다');
   }
 
   private async copyToClipboard(text: string): Promise<boolean> {
-    // 보안 컨텍스트면 Clipboard API.
     if (navigator.clipboard?.writeText) {
       try {
         await navigator.clipboard.writeText(text);
@@ -124,7 +220,6 @@ export class MovieDetail {
         // 권한 거부 등 — 레거시로 폴백한다.
       }
     }
-    // 레거시 폴백: 비보안 컨텍스트에서도 동작한다.
     try {
       const ta = document.createElement('textarea');
       ta.value = text;

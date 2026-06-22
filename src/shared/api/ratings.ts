@@ -1,5 +1,12 @@
-import { Service } from '@angular/core';
-import { db, type Rating } from './db';
+import { Service, type Signal } from '@angular/core';
+import { db, type Movie, type Rating } from './db';
+import { liveQuerySignal } from '@/shared/lib';
+
+/** 내가 평가한 영화 한 건(영화 + 내 점수). */
+export interface RatedMovie {
+  movie: Movie;
+  score: number;
+}
 
 /**
  * 평점 저장소.
@@ -11,6 +18,22 @@ export class RatingRepository {
   /** 회원이 남긴 평점 목록(최근 평가 순). */
   list(userId: string): Promise<Rating[]> {
     return db.ratings.where('userId').equals(userId).reverse().sortBy('ratedAt');
+  }
+
+  /**
+   * 회원의 평점을 영화 + 점수로 펼쳐 반응형으로 노출한다(최근 평가 순).
+   * 주입 컨텍스트에서 호출해야 한다(liveQuerySignal). 평가/수정/삭제 시 자동 갱신된다.
+   */
+  liveRated(userId: string): Signal<RatedMovie[]> {
+    return liveQuerySignal<RatedMovie[]>(async () => {
+      const ratings = await db.ratings.where('userId').equals(userId).reverse().sortBy('ratedAt');
+      const rated: RatedMovie[] = [];
+      for (const r of ratings) {
+        const movie = await db.movies.get(r.movieId);
+        if (movie) rated.push({ movie, score: r.score });
+      }
+      return rated;
+    }, []);
   }
 
   get(userId: string, movieId: string): Promise<Rating | undefined> {

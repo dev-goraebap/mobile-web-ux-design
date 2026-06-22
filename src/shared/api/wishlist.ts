@@ -1,5 +1,6 @@
-import { Service } from '@angular/core';
-import { db, type WishlistItem } from './db';
+import { Service, type Signal } from '@angular/core';
+import { db, type Movie, type WishlistItem } from './db';
+import { liveQuerySignal } from '@/shared/lib';
 
 /**
  * 위시리스트 저장소.
@@ -11,6 +12,18 @@ export class WishlistRepository {
   /** 회원의 위시리스트(최근 담은 순). */
   list(userId: string): Promise<WishlistItem[]> {
     return db.wishlist.where('userId').equals(userId).reverse().sortBy('addedAt');
+  }
+
+  /**
+   * 회원의 위시리스트를 영화 객체로 펼쳐 반응형으로 노출한다(최근 담은 순).
+   * 주입 컨텍스트에서 호출해야 한다(liveQuerySignal). 담기/빼기 시 자동 갱신된다.
+   */
+  liveMovies(userId: string): Signal<Movie[]> {
+    return liveQuerySignal<Movie[]>(async () => {
+      const items = await db.wishlist.where('userId').equals(userId).reverse().sortBy('addedAt');
+      const movies = await db.movies.bulkGet(items.map((i) => i.movieId));
+      return movies.filter((m): m is Movie => m !== undefined);
+    }, []);
   }
 
   has(userId: string, movieId: string): Promise<boolean> {
