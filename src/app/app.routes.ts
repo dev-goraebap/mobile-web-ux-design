@@ -14,6 +14,10 @@ export const routes: Routes = [
     loadComponent: () => import('@/pages/movie-detail/movie-detail-page'),
   },
   {
+    path: 'search',
+    loadComponent: () => import('@/pages/search/search'),
+  },
+  {
     path: 'login',
     loadComponent: () => import('@/pages/login/login'),
   },

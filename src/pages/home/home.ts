@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { MovieRepository, type Movie } from '@/shared/api';
 import { MovieCard } from '@/entities/movie';
 import { OpenMovieService } from '@/features/open-movie';
+import { SearchBox } from '@/widgets/search-box/search-box';
 
 /**
  * 홈 — 영화 카탈로그(추천 + 전체).
@@ -10,15 +11,18 @@ import { OpenMovieService } from '@/features/open-movie';
  */
 @Component({
   selector: 'page-home',
-  imports: [MovieCard],
+  imports: [MovieCard, SearchBox],
   host: { class: 'block' },
   template: `
     <div class="flex flex-col gap-10 px-5 py-6">
-      <header>
-        <h1 class="text-3xl font-bold text-foreground">영화 카탈로그</h1>
-        <p class="mt-1 text-muted-foreground">
-          데스크톱은 모달로, 모바일은 페이지로 — 같은 영화를 환경에 맞게 엽니다.
-        </p>
+      <header class="flex flex-col gap-4">
+        <div>
+          <h1 class="text-3xl font-bold text-foreground">영화 카탈로그</h1>
+          <p class="mt-1 text-muted-foreground">
+            데스크톱은 모달로, 모바일은 페이지로 — 같은 영화를 환경에 맞게 엽니다.
+          </p>
+        </div>
+        <search-box class="lg:max-w-sm" />
       </header>
 
       @if (movies.featured().length) {
