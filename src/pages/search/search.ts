@@ -1,7 +1,9 @@
 import { Component, effect, inject, input, signal, untracked } from '@angular/core';
 import { Location } from '@angular/common';
 import { HlmInput } from '@spartan-ng/helm/input';
+import { HlmButton } from '@spartan-ng/helm/button';
 import { MovieRepository, type Movie } from '@/shared/api';
+import { NavExitService } from '@/shared/lib';
 import { MovieCard } from '@/entities/movie';
 import { OpenMovieService } from '@/features/open-movie';
 
@@ -12,12 +14,17 @@ import { OpenMovieService } from '@/features/open-movie';
  */
 @Component({
   selector: 'page-search',
-  imports: [HlmInput, MovieCard],
+  imports: [HlmInput, HlmButton, MovieCard],
   host: { class: 'block' },
   template: `
     <div class="flex flex-col gap-6 px-5 py-6">
       <header class="flex flex-col gap-3">
-        <h1 class="text-2xl font-bold text-foreground">검색</h1>
+        <div class="flex items-center justify-between">
+          <h1 class="text-2xl font-bold text-foreground">검색</h1>
+          <button hlmBtn variant="ghost" size="icon" (click)="close()" aria-label="검색 닫기">
+            ✕
+          </button>
+        </div>
         <input
           hlmInput
           type="search"
@@ -53,6 +60,7 @@ export default class Search {
   private readonly repo = inject(MovieRepository);
   private readonly location = inject(Location);
   private readonly opener = inject(OpenMovieService);
+  private readonly navExit = inject(NavExitService);
 
   protected readonly query = signal('');
   protected readonly results = signal<Movie[]>([]);
@@ -84,5 +92,10 @@ export default class Search {
 
   protected open(movie: Movie): void {
     this.opener.open(movie.id);
+  }
+
+  /** 검색 닫기 → 이전 화면(보통 홈)으로. 직접 진입했으면 홈으로. */
+  protected close(): void {
+    this.navExit.backOrHome();
   }
 }

@@ -1,7 +1,7 @@
 import { Component, inject, input } from '@angular/core';
-import { Location } from '@angular/common';
 import { HlmButton } from '@spartan-ng/helm/button';
 import { MovieDetail } from '@/entities/movie';
+import { NavExitService } from '@/shared/lib';
 
 /**
  * 영화 상세 페이지 — `/movies/:id`의 canonical 풀스크린 표현.
@@ -28,9 +28,9 @@ import { MovieDetail } from '@/entities/movie';
 export default class MovieDetailPage {
   // 라우트 파라미터 :id를 입력으로 받는다(withComponentInputBinding).
   readonly id = input.required<string>();
-  private readonly location = inject(Location);
+  private readonly navExit = inject(NavExitService);
 
   protected back(): void {
-    this.location.back();
+    this.navExit.backOrHome();
   }
 }
