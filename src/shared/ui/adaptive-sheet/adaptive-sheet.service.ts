@@ -57,10 +57,11 @@ export class AdaptiveSheetService {
 
   open<R = unknown>(component: ComponentType<unknown>, data?: unknown): AdaptiveSheetRef<R> {
     const isMobile = this.bp.isMobile();
-    // 기술: 전폭 바텀시트는 포지션 전략에 width('100%')를 직접 줘야 안정적이다
-    // (CDK Global 포지션에서 config.width는 적용이 어긋날 수 있다). 데스크톱은 콘텐츠 폭에 맡긴다.
+    // 기술: 전폭 바텀시트는 뷰포트 단위(100vw)로 너비를 줘야 한다. CDK의 global-overlay-wrapper는
+    // 명시적 너비가 없어 내용만큼 줄어들기 때문에, pane을 width:100%(=줄어든 wrapper의 100%)로 두면
+    // 좁아진다. 100vw는 부모와 무관하게 화면 전체를 차지한다. 데스크톱은 콘텐츠 폭에 맡긴다.
     const positionStrategy = isMobile
-      ? this.overlay.position().global().bottom('0').left('0').width('100%')
+      ? this.overlay.position().global().bottom('0').left('0').width('100vw')
       : this.overlay.position().global().centerHorizontally().centerVertically();
 
     const overlayRef = this.overlay.create({
