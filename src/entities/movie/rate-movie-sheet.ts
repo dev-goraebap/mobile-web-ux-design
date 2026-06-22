@@ -97,8 +97,9 @@ export class RateMovieSheet {
 
   protected get containerClass(): string {
     const base = 'bg-popover p-5 text-popover-foreground shadow-lg outline-none animate-in fade-in-0';
+    // 모바일: 뷰포트에 직접 고정(fixed inset-x-0 bottom-0)해 오버레이 박스와 무관하게 전폭 보장.
     return this.isMobile
-      ? `${base} w-full rounded-t-2xl slide-in-from-bottom-4`
+      ? `${base} fixed inset-x-0 bottom-0 rounded-t-2xl slide-in-from-bottom-4`
       : `${base} w-[420px] max-w-[90vw] rounded-2xl zoom-in-95`;
   }
 
